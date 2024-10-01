@@ -49,6 +49,7 @@ jobs:
       run: |
         mkdir -p $HOME/.kube
         echo "${KUBE_CONFIG_DATA}" | base64 --decode > $HOME/.kube/config
+        sed -i 's|C:\\Users\\Lucas\\.minikube|/home/runner/.minikube|g' $HOME/.kube/config
         kubectl apply -f k8s/deployment.yaml
       working-directory: carros
       
