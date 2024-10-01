@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: carros-deployment
+  labels:
+    app: carros
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: carros
+  template:
+    metadata:
+      labels:
+        app: carros
+    spec:
+      containers:
+        - name: carros
+          image: lucaspcabral/carros:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: carros-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: carros
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
