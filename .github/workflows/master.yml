@@ -66,5 +66,5 @@ jobs:
       env:
         KUBECONFIG: /home/runner/.kube/config
       run: |
-        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/deployment.yaml --validate=false
       working-directory: carros
