@@ -43,17 +43,24 @@ jobs:
       with:
         version: 'latest'
         
-    - name: Set up Kubernetes config
+    - name: Set up Kubernetes config and certificates
       env:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        CA_CRT: ${{ secrets.CA_CRT }}
+        CLIENT_CRT: ${{ secrets.CLIENT_CRT }}
+        CLIENT_KEY: ${{ secrets.CLIENT_KEY }}
       run: |
-        mkdir -p $HOME/.kube
+        # Create .kube and .minikube directories
+        mkdir -p $HOME/.kube $HOME/.minikube/profiles/minikube
+        
+        # Decode and place the Kube config
         echo "${KUBE_CONFIG_DATA}" | base64 --decode > $HOME/.kube/config
-        sed -i 's|C:\\Users\\Lucas\\.minikube|/home/runner/.minikube|g' $HOME/.kube/config
-    
-    - name: Create Kubernetes secret
-      run: |
-        kubectl create secret generic kube-config --from-file=config=$HOME/.kube/config
+        
+        # Decode and place the CA, client certificate, and client key
+        echo "${CA_CRT}" | base64 --decode > $HOME/.minikube/ca.crt
+        echo "${CLIENT_CRT}" | base64 --decode > $HOME/.minikube/profiles/minikube/client.crt
+        echo "${CLIENT_KEY}" | base64 --decode > $HOME/.minikube/profiles/minikube/client.key
+
     
     - name: Deploy to Kubernetes
       env:
