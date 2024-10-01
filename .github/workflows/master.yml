@@ -1,9 +1,9 @@
-name: Deploy Kubernetes
+name: Deploy para Kubernetes
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -16,17 +16,19 @@ jobs:
     - name: Configurar JDK 17
       uses: actions/setup-java@v2
       with:
-        distribution: 'adopt' # Specify the distribution here
+        distribution: 'adopt'
         java-version: '17'
-        
-    - name: Compilar com Maven
-      run: mvn clean package
+
+    - name: Construir com Maven
+      run: mvn clean package -DskipTests
+      working-directory: carros
 
     - name: Construir imagem Docker
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/carros:latest .
         echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
         docker push ${{ secrets.DOCKER_USERNAME }}/carros:latest
+      working-directory: carros
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,3 +49,4 @@ jobs:
       run: |
         echo "${KUBE_CONFIG_DATA}" | base64 --decode > $HOME/.kube/config
         kubectl apply -f k8s/deployment.yaml
+      working-directory: carros
